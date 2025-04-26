@@ -5,11 +5,35 @@ server:
   grpc:
     addr: 0.0.0.0:9000
     timeout: 1s
+  cors:
+    allowed_origins:
+      - "*"
+    allowed_methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+      - OPTIONS
+    allowed_headers:
+      - Authorization
+      - Content-Type
+      - Accept
 data:
   database:
-    driver: mysql
-    source: root:root@tcp(127.0.0.1:3306)/test?parseTime=True&loc=Local
+    url: mongodb://localhost:27017
+    username: orka
+    password: orka
+    db: orka
   redis:
-    addr: 127.0.0.1:6379
-    read_timeout: 0.2s
-    write_timeout: 0.2s
+    addr: localhost:6379
+    password: orka
+    db: 0
+jwt:
+  secret: "2a1ae36f-81f6-4606-a36b-7146a9cd3ea8"
+  expiry: 3600
+  refresh_expiry: 604800
+service:
+  name: core
+  version: v1.0.0
+  env: dev

@@ -7,13 +7,14 @@
 package main
 
 import (
-	"OrkaCore/internal/biz"
-	"OrkaCore/internal/conf"
-	"OrkaCore/internal/data"
-	"OrkaCore/internal/server"
-	"OrkaCore/internal/service"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/orka-org/orkacore/internal/biz"
+	"github.com/orka-org/orkacore/internal/conf"
+	"github.com/orka-org/orkacore/internal/data"
+	"github.com/orka-org/orkacore/internal/server"
+	"github.com/orka-org/orkacore/internal/service"
+	"github.com/orka-org/orkacore/pkg/tokens"
 )
 
 import (
@@ -23,16 +24,22 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
+func wireApp(bootstrap *conf.Bootstrap, confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
+	tokenFactory := tokens.NewTokenProvider(bootstrap)
 	dataData, cleanup, err := data.NewData(confData, logger)
 	if err != nil {
 		return nil, nil, err
 	}
-	greeterRepo := data.NewGreeterRepo(dataData, logger)
-	greeterUsecase := biz.NewGreeterUsecase(greeterRepo, logger)
-	greeterService := service.NewGreeterService(greeterUsecase)
-	grpcServer := server.NewGRPCServer(confServer, greeterService, logger)
-	httpServer := server.NewHTTPServer(confServer, greeterService, logger)
+	userRepo, err := data.NewUserRepo(dataData, logger)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	userUsecase := biz.NewUserUsecase(userRepo, logger)
+	authUsecase := biz.NewAuthUsecase(tokenFactory, userUsecase, logger)
+	authServiceService := service.NewAuthServiceService(authUsecase, logger)
+	grpcServer := server.NewGRPCServer(confServer, authServiceService, logger)
+	httpServer := server.NewHTTPServer(confServer, authServiceService, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup()

@@ -3,37 +3,155 @@
 
 openapi: 3.0.3
 info:
-    title: Greeter API
-    description: The greeting service definition.
+    title: AuthService API
     version: 0.0.1
 paths:
-    /helloworld/{name}:
-        get:
+    /auth/login:
+        post:
             tags:
-                - Greeter
-                - subgroup
-            description: Sends a greeting
-            operationId: Greeter_SayHello
-            parameters:
-                - name: name
-                  in: path
-                  required: true
-                  schema:
-                    type: string
+                - AuthService
+            operationId: AuthService_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth.v1.LoginRequest'
+                required: true
             responses:
                 "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/helloworld.v1.HelloReply'
+                                $ref: '#/components/schemas/auth.v1.LoginResponse'
+    /auth/register:
+        post:
+            tags:
+                - AuthService
+            operationId: AuthService_Register
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth.v1.RegisterRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/auth.v1.RegisterResponse'
+    /auth/user:
+        post:
+            tags:
+                - AuthService
+            operationId: AuthService_GetUser
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth.v1.GetUserRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/auth.v1.GetUserResponse'
+    /auth/validate:
+        post:
+            tags:
+                - AuthService
+            operationId: AuthService_ValidateToken
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth.v1.ValidateTokenRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/auth.v1.ValidateTokenResponse'
 components:
     schemas:
-        helloworld.v1.HelloReply:
+        auth.v1.GetUserRequest:
             type: object
             properties:
-                message:
+                userId:
                     type: string
-            description: The response message containing the greetings
+        auth.v1.GetUserResponse:
+            type: object
+            properties:
+                user:
+                    $ref: '#/components/schemas/auth.v1.User'
+        auth.v1.LoginRequest:
+            type: object
+            properties:
+                email:
+                    type: string
+                password:
+                    type: string
+        auth.v1.LoginResponse:
+            type: object
+            properties:
+                accessToken:
+                    type: string
+                refreshToken:
+                    type: string
+        auth.v1.RegisterRequest:
+            type: object
+            properties:
+                email:
+                    type: string
+                password:
+                    type: string
+        auth.v1.RegisterResponse:
+            type: object
+            properties:
+                accessToken:
+                    type: string
+                refreshToken:
+                    type: string
+        auth.v1.User:
+            type: object
+            properties:
+                id:
+                    type: string
+                email:
+                    type: string
+                username:
+                    type: string
+                firstName:
+                    type: string
+                lastName:
+                    type: string
+                phone:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+                deletedAt:
+                    type: string
+                suspendedAt:
+                    type: string
+        auth.v1.ValidateTokenRequest:
+            type: object
+            properties:
+                token:
+                    type: string
+        auth.v1.ValidateTokenResponse:
+            type: object
+            properties:
+                valid:
+                    type: boolean
+                user:
+                    $ref: '#/components/schemas/auth.v1.User'
 tags:
-    - name: Greeter
+    - name: AuthService
