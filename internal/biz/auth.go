@@ -59,7 +59,7 @@ func (a *authUsecase) Login(ctx context.Context, email, password string) (*Token
 	}
 	accessExp := a.jwtConf.GetExpiry()
 	if accessExp == 0 {
-		accessExp = 60 * 60 * 24 * 7
+		accessExp = 60 * 60
 	}
 	refreshExp := a.jwtConf.GetRefreshExpiry()
 	if refreshExp == 0 {
@@ -98,10 +98,12 @@ func (a *authUsecase) Register(ctx context.Context, email, password string) (*To
 	}
 	accessExp := a.jwtConf.GetExpiry()
 	if accessExp == 0 {
-		accessExp = 60 * 60 * 24 * 7
+		a.log.Warn("access_expiry is not set")
+		accessExp = 60 * 60
 	}
 	refreshExp := a.jwtConf.GetRefreshExpiry()
 	if refreshExp == 0 {
+		a.log.Warn("refresh_expiry is not set")
 		refreshExp = 60 * 60 * 24 * 7
 	}
 
@@ -147,15 +149,12 @@ func (a *authUsecase) GetUser(ctx context.Context, userID string) (*User, error)
 }
 
 func (a *authUsecase) GenToken(ctx context.Context, user *User, expiry int32) (string, error) {
-	exp := time.Duration(expiry) * time.Second
 	token := a.tf.NewTokenPayload().
 		SetID(user.ID).
 		SetUsername(user.Username).
 		SetEmail(user.Email).
-		SetExtraClaims(map[string]interface{}{
-			"exp": time.Now().Add(exp).Unix(),
-		}).
-		Build(time.Second * exp)
+		SetExtraClaims(map[string]interface{}{}).
+		Build(time.Second * time.Duration(expiry))
 	tokenBytes, err := token.Sign()
 	if err != nil {
 		return "", err
