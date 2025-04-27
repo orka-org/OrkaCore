@@ -1,0 +1,282 @@
+syntax = "proto3";
+
+package organization.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/orka-org/orkacore/api/organization/v1;v1";
+
+message Organization {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string owner_id = 4;
+  OrgSettings settings = 5;
+
+  int64 created_at = 6;
+  int64 updated_at = 7;
+  int64 deleted_at = 8;
+}
+
+message OrgSettings {
+  bool allow_members_to_invite = 1;
+  bool admin_role_confirmation = 2;
+  bool invite_confirmation = 3;
+  string invite_confirmation_role = 4;
+  string default_invite_role = 5;
+}
+
+message Role {
+  string id = 1;
+  string org_id = 2;
+  string name = 3;
+  repeated Permission permissions = 4;
+
+  int64 created_at = 5;
+  int64 updated_at = 6;
+  int64 deleted_at = 7;
+}
+
+message Permission {
+  string object = 1;
+  string action = 2;
+}
+
+message Member {
+  string id = 1;
+  string org_id = 2;
+  string user_id = 3;
+  string role_id = 4;
+  string invited_by_id = 5;
+
+  int64 created_at = 6;
+  int64 updated_at = 7;
+  int64 deleted_at = 8;
+}
+
+service OrgService {
+  rpc CreateOrg(CreateOrgRequest) returns (CreateOrgResponse) {
+    option (google.api.http) = {
+      post: "/organizations/create"
+      body: "*"
+      additional_bindings {
+        header: "Authorization"
+      }
+    };
+  }
+  rpc GetOrg(GetOrgRequest) returns (GetOrgResponse) {
+    option (google.api.http) = {
+      post: "organizations/{org_id}"
+      body: "*"
+      additional_bindings {
+        header: "Authorization"
+      }
+    };
+  }
+  rpc UpdateOrg(UpdateOrgRequest) returns (UpdateOrgResponse) {
+    option (google.api.http) = {
+      patch: "organizations/{org_id}"
+      body: "*"
+      additional_bindings {
+        header: "Authorization"
+      }
+    };
+  }
+  rpc DeleteOrg(DeleteOrgRequest) returns (DeleteOrgResponse) {
+    option (google.api.http) = {
+      delete: "organizations/{org_id}"
+      body: "*"
+      additional_bindings {
+        header: "Authorization"
+      }
+    };
+  }
+	rpc UpdateOrgSettings(UpdateOrgSettingsRequest) returns (UpdateOrgSettingsResponse) {
+		option (google.api.http) = {
+			patch: "organizations/{org_id}/settings"
+			body: "*"
+			additional_bindings {
+				header: "Authorization"
+			}
+		};
+	}
+
+  rpc GetMembers(GetMembersRequest) returns (GetMembersResponse) {
+    option (google.api.http) = {
+      get: "organizations/{org_id}/members"
+      body: "*"
+      additional_bindings {
+        header: "Authorization"
+      }
+    };
+  }
+
+  rpc InviteMember(InviteMemberRequest) returns (InviteMemberResponse) {
+    option (google.api.http) = {
+      post: "organizations/{org_id}/members"
+      body: "*"
+      additional_bindings {
+        header: "Authorization"
+      }
+    };
+  }
+  rpc RemoveMember(RemoveMemberRequest) returns (RemoveMemberResponse) {
+    option (google.api.http) = {
+      delete: "organizations/{org_id}/members/{user_id}"
+      body: "*"
+      additional_bindings {
+        header: "Authorization"
+      }
+    };
+  }
+  rpc UpdateMemberRole(UpdateMemberRoleRequest) returns (UpdateMemberRoleResponse) {
+    option (google.api.http) = {
+      patch: "organizations/{org_id}/members/{user_id}"
+      body: "*"
+      additional_bindings {
+        header: "Authorization"
+      }
+    };
+  }
+
+  rpc AddOrgRole(AddOrgRoleRequest) returns (AddOrgRoleResponse) {
+    option (google.api.http) = {
+      post: "organizations/{org_id}/roles"
+      body: "*"
+      additional_bindings {
+        header: "Authorization"
+      }
+    };
+  }
+  rpc RemoveOrgRole(RemoveOrgRoleRequest) returns (RemoveOrgRoleResponse) {
+    option (google.api.http) = {
+      delete: "organizations/{org_id}/roles/{role_id}"
+      body: "*"
+      additional_bindings {
+        header: "Authorization"
+      }
+    };
+  }
+  rpc UpdateOrgRolePermission(UpdateOrgRolePermissionRequest) returns (UpdateOrgRolePermissionResponse) {
+    option (google.api.http) = {
+      post: "organizations/{org_id}/roles/{role_id}/permissions"
+      body: "*"
+      additional_bindings {
+        header: "Authorization"
+      }
+    };
+  }
+}
+
+message CreateOrgRequest {
+	string Authorization = 1;
+	string name = 2;
+	string description = 3;
+	OrgSettings settings = 5;
+}
+message CreateOrgResponse {
+	Organization organization = 1;
+}
+
+message GetOrgRequest {
+	string Authorization = 1;
+	string org_id = 2;
+}
+message GetOrgResponse {
+	Organization organization = 1;
+}
+
+message UpdateOrgRequest {
+	string Authorization = 1;
+	string org_id = 2;
+	string name = 3;
+	string description = 4;
+	OrgSettings settings = 5;
+}
+message UpdateOrgResponse {
+	Organization organization = 1;
+}
+
+message DeleteOrgRequest {
+	string Authorization = 1;
+	string org_id = 2;
+}
+message DeleteOrgResponse {
+	Organization organization = 1;
+}
+
+message UpdateOrgSettingsRequest {
+	string Authorization = 1;
+	string org_id = 2;
+	OrgSettings settings = 3;
+}
+message UpdateOrgSettingsResponse {
+	Organization organization = 1;
+}
+
+message GetMembersRequest {
+	string Authorization = 1;
+	string org_id = 2;
+}
+message GetMembersResponse {
+	repeated Member members = 1;
+}
+
+message InviteMemberRequest {
+	string Authorization = 1;
+	string org_id = 2;
+	string user_id = 3;
+	optional string role_id = 4;
+}
+message InviteMemberResponse {
+	Member member = 1;
+}
+
+message RemoveMemberRequest {
+	string Authorization = 1;
+	string org_id = 2;
+	string user_id = 3;
+}
+message RemoveMemberResponse {
+	Member member = 1;
+}
+
+message UpdateMemberRoleRequest {
+	string Authorization = 1;
+	string org_id = 2;
+	string user_id = 3;
+	string role_id = 4;
+}
+message UpdateMemberRoleResponse {
+	Member member = 1;
+}
+
+message AddOrgRoleRequest {
+	string Authorization = 1;
+	string org_id = 2;
+	string role_name = 3;
+	repeated Permission permissions = 4;
+}
+message AddOrgRoleResponse {
+	Role role = 1;
+}
+
+message RemoveOrgRoleRequest {
+	string Authorization = 1;
+	string org_id = 2;
+	string role_id = 3;
+}
+message RemoveOrgRoleResponse {
+	Role role = 1;
+}
+
+message UpdateOrgRolePermissionRequest {
+	string Authorization = 1;
+	string org_id = 2;
+	string role_id = 3;
+	repeated Permission permissions = 4;
+}
+message UpdateOrgRolePermissionResponse {
+	Role role = 1;
+}
+
