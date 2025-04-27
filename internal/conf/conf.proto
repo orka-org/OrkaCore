@@ -45,8 +45,15 @@ message Data {
 		string password = 2;
 		int32 db = 3;
   }
+	message Nats {
+		string addr = 1;
+		string username = 2;
+		string password = 3;
+		string subject = 4;
+	}
   Database database = 1;
   Redis redis = 2;
+	Nats nats = 3;
 }
 
 message JWT {

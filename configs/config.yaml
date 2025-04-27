@@ -29,6 +29,11 @@ data:
     addr: localhost:6379
     password: orka
     db: 0
+  nats:
+    addr: localhost:4222
+    username: orka
+    password: orka
+    subject: orka
 jwt:
   secret: "2a1ae36f-81f6-4606-a36b-7146a9cd3ea8"
   expiry: 3600
