@@ -12,3 +12,15 @@ services:
       - "6379:6379"
     environment:
       REDIS_PASSWORD: orka
+  nats:
+    image: nats:latest
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    command: ["--js"]
+    # volumes:
+    #   - nats-data:/data
+    environment:
+      - NATS_SERVER_NAME=orka
+      - JS_MAX_MEMORY_STORE=1G
+      - JS_MAX_FILE_STORE=10G

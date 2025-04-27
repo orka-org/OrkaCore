@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/nats-io/nats.go"
 	"github.com/orka-org/orkacore/internal/conf"
 	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,6 +22,7 @@ type Data struct {
 	mongo *mongo.Client
 	redis *redis.Client
 	db    *mongo.Database
+	nats  *nats.Conn
 }
 
 // NewData .
@@ -28,20 +30,35 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 	log := log.NewHelper(logger)
 	ctx := context.Background()
 
+	log.Debug("Connecting to MongoDB")
 	var mongoDb *mongo.Database
 	mongoClient, mongoCleanup, mongoErr := MongoClient(ctx, c, log)
 	if mongoErr != nil {
 		log.Error(mongoErr, "failed to connect to MongoDB")
+	} else {
+		dbname := "orka"
+		if c.Database.Db != "" {
+			dbname = c.Database.Db
+		}
+		mongoDb = MongoConn(ctx, mongoClient, log, dbname)
+		log.Debug("Connected to MongoDB")
 	}
-	dbname := "orka"
-	if c.Database.Db != "" {
-		dbname = c.Database.Db
-	}
-	mongoDb = MongoConn(ctx, mongoClient, log, dbname)
 
+	log.Debug("Connecting to Redis")
 	redisClient, redisCleanup, redisErr := RedisConn(ctx, c, log)
 	if redisErr != nil {
 		log.Error(redisErr, "failed to connect to Redis")
+	} else {
+		log.Debug("Connected to Redis")
+	}
+
+	log.Debug("Connecting to NATS")
+	var natsClient *nats.Conn
+	natsClient, natsCleanup, natsErr := NatsConn(ctx, c, log)
+	if natsErr != nil {
+		log.Error(natsErr, "failed to connect to NATS")
+	} else {
+		log.Debug("Connected to NATS")
 	}
 
 	cleanup := func() {
@@ -58,12 +75,20 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 				log.Error(err, "failed to close Redis")
 			}
 		}
+		if natsErr == nil {
+			err := natsCleanup()
+			if err != nil {
+				log.Error(err, "failed to close NATS")
+			}
+		}
 	}
 
+	log.Debug("Connected to all data sources")
 	return &Data{
 		mongo: mongoClient,
 		redis: redisClient,
 		db:    mongoDb,
+		nats:  natsClient,
 	}, cleanup, nil
 }
 
@@ -109,4 +134,34 @@ func RedisConn(ctx context.Context, c *conf.Data, log *log.Helper) (*redis.Clien
 	}
 
 	return redisClient, redisCleanup, nil
+}
+
+func NatsConn(ctx context.Context, c *conf.Data, log *log.Helper) (*nats.Conn, func() error, error) {
+	if c.GetNats() == nil || c.GetNats().GetAddr() == "" {
+		return nil, nil, errors.New("NATS configuration is missing")
+	}
+
+	var opts []nats.Option
+
+	if c.GetNats().GetUsername() != "" && c.GetNats().GetPassword() != "" {
+		log.Debug("Found NATS credentials, using them")
+		opts = append(opts, nats.UserInfo(c.Nats.Username, c.Nats.Password))
+	}
+
+	if c.GetNats().GetSubject() != "" {
+		log.Debug("Found NATS subject, using it")
+		opts = append(opts, nats.Name(c.Nats.Subject))
+	}
+
+	natsClient, natsErr := nats.Connect(c.Nats.Addr, opts...)
+	if natsErr != nil {
+		log.Error(natsErr, "failed to connect to NATS")
+		return nil, nil, natsErr
+	}
+
+	natsCleanup := func() error {
+		return natsClient.Drain()
+	}
+
+	return natsClient, natsCleanup, nil
 }
