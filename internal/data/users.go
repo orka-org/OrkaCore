@@ -67,12 +67,18 @@ func (r *userRepo) GetUserByEmail(ctx context.Context, email string) (*biz.User,
 		return nil, res.Err()
 	}
 
-	var user biz.User
+	var user User
 	err := res.Decode(&user)
 	if err != nil {
 		return nil, err
 	}
-	return &user, nil
+
+	resUser, err := DBtoBiz(&user)
+	if err != nil {
+		return nil, err
+	}
+
+	return resUser, nil
 }
 
 func (r *userRepo) GetUserByID(ctx context.Context, id string) (*biz.User, error) {
@@ -80,17 +86,23 @@ func (r *userRepo) GetUserByID(ctx context.Context, id string) (*biz.User, error
 	if err != nil {
 		return nil, err
 	}
+
 	res := r.coll.FindOne(ctx, bson.M{"_id": objId})
 	if res.Err() != nil {
 		return nil, res.Err()
 	}
 
-	var user biz.User
+	var user User
 	err = res.Decode(&user)
 	if err != nil {
 		return nil, err
 	}
-	return &user, nil
+
+	resUser, err := DBtoBiz(&user)
+	if err != nil {
+		return nil, err
+	}
+	return resUser, nil
 }
 
 func (r *userRepo) GetAllUsers(ctx context.Context) ([]*biz.User, error) {
@@ -103,12 +115,16 @@ func (r *userRepo) GetAllUsers(ctx context.Context) ([]*biz.User, error) {
 	var users []*biz.User
 
 	for cursor.Next(ctx) {
-		var user biz.User
+		var user User
 		err := cursor.Decode(&user)
 		if err != nil {
 			return nil, err
 		}
-		users = append(users, &user)
+		resUser, err := DBtoBiz(&user)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, resUser)
 	}
 	return users, nil
 }

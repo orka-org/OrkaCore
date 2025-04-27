@@ -104,6 +104,7 @@ func (p *tokenPayload) Parse(token string) (TokenPayload, error) {
 	if !ok {
 		return nil, errors.New("subject is not string")
 	}
+
 	p.ID = id
 	var username string
 	err = payload.Get("username", &username)

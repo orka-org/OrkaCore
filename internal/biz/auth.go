@@ -47,38 +47,13 @@ func (a *authUsecase) Login(ctx context.Context, email, password string) (*Token
 	if user == nil {
 		return nil, errors.New("user not found")
 	}
-	if user.Password != password {
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
 		return nil, errors.New("invalid password")
 	}
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return nil, err
-	}
-	if user.Password != string(hashedPassword) {
-		return nil, errors.New("invalid password")
-	}
-	accessExp := a.jwtConf.GetExpiry()
-	if accessExp == 0 {
-		accessExp = 60 * 60
-	}
-	refreshExp := a.jwtConf.GetRefreshExpiry()
-	if refreshExp == 0 {
-		refreshExp = 60 * 60 * 24 * 7
-	}
 
-	access, err := a.GenToken(ctx, user, accessExp)
-	if err != nil {
-		return nil, err
-	}
-	refresh, err := a.GenToken(ctx, user, refreshExp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &TokensPair{
-		Access:  access,
-		Refresh: refresh,
-	}, nil
+	return a.genTokenPair(ctx, user)
 }
 
 func (a *authUsecase) Register(ctx context.Context, email, password string) (*TokensPair, error) {
@@ -96,30 +71,7 @@ func (a *authUsecase) Register(ctx context.Context, email, password string) (*To
 	if err != nil {
 		return nil, err
 	}
-	accessExp := a.jwtConf.GetExpiry()
-	if accessExp == 0 {
-		a.log.Warn("access_expiry is not set")
-		accessExp = 60 * 60
-	}
-	refreshExp := a.jwtConf.GetRefreshExpiry()
-	if refreshExp == 0 {
-		a.log.Warn("refresh_expiry is not set")
-		refreshExp = 60 * 60 * 24 * 7
-	}
-
-	access, err := a.GenToken(ctx, user, accessExp)
-	if err != nil {
-		return nil, err
-	}
-	refresh, err := a.GenToken(ctx, user, refreshExp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &TokensPair{
-		Access:  access,
-		Refresh: refresh,
-	}, nil
+	return a.genTokenPair(ctx, user)
 }
 
 func (a *authUsecase) ValidateToken(ctx context.Context, token string) (*User, error) {
@@ -127,6 +79,7 @@ func (a *authUsecase) ValidateToken(ctx context.Context, token string) (*User, e
 	if err != nil {
 		return nil, err
 	}
+
 	user, err := a.userUc.GetUserByID(ctx, res.GetID())
 	if err != nil {
 		return nil, err
@@ -148,7 +101,8 @@ func (a *authUsecase) GetUser(ctx context.Context, userID string) (*User, error)
 	return user, nil
 }
 
-func (a *authUsecase) GenToken(ctx context.Context, user *User, expiry int32) (string, error) {
+func (a *authUsecase) genToken(ctx context.Context, user *User, expiry int32) (string, error) {
+	a.log.Debug("gen tokens; user id = ", user.ID)
 	token := a.tf.NewTokenPayload().
 		SetID(user.ID).
 		SetUsername(user.Username).
@@ -160,4 +114,29 @@ func (a *authUsecase) GenToken(ctx context.Context, user *User, expiry int32) (s
 		return "", err
 	}
 	return string(tokenBytes), nil
+}
+
+func (a *authUsecase) genTokenPair(ctx context.Context, user *User) (*TokensPair, error) {
+	accessExp := a.jwtConf.GetExpiry()
+	if accessExp == 0 {
+		accessExp = 60 * 60
+	}
+	refreshExp := a.jwtConf.GetRefreshExpiry()
+	if refreshExp == 0 {
+		refreshExp = 60 * 60 * 24 * 7
+	}
+
+	access, err := a.genToken(ctx, user, accessExp)
+	if err != nil {
+		return nil, err
+	}
+	refresh, err := a.genToken(ctx, user, refreshExp)
+	if err != nil {
+		return nil, err
+	}
+
+	return &TokensPair{
+		Access:  access,
+		Refresh: refresh,
+	}, nil
 }
