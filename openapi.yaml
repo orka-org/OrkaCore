@@ -3,7 +3,7 @@
 
 openapi: 3.0.3
 info:
-    title: AuthService API
+    title: ""
     version: 0.0.1
 paths:
     /auth/login:
@@ -78,6 +78,304 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/auth.v1.ValidateTokenResponse'
+    /organizations/create:
+        post:
+            tags:
+                - OrgService
+            operationId: OrgService_CreateOrg
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/organization.v1.CreateOrgRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/organization.v1.CreateOrgResponse'
+    organizations/{orgId}:
+        post:
+            tags:
+                - OrgService
+            operationId: OrgService_GetOrg
+            parameters:
+                - name: orgId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/organization.v1.GetOrgRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/organization.v1.GetOrgResponse'
+        delete:
+            tags:
+                - OrgService
+            operationId: OrgService_DeleteOrg
+            parameters:
+                - name: orgId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/organization.v1.DeleteOrgRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/organization.v1.DeleteOrgResponse'
+        patch:
+            tags:
+                - OrgService
+            operationId: OrgService_UpdateOrg
+            parameters:
+                - name: orgId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/organization.v1.UpdateOrgRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/organization.v1.UpdateOrgResponse'
+    organizations/{orgId}/members:
+        get:
+            tags:
+                - OrgService
+            operationId: OrgService_GetMembers
+            parameters:
+                - name: orgId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/organization.v1.GetMembersRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/organization.v1.GetMembersResponse'
+        post:
+            tags:
+                - OrgService
+            operationId: OrgService_InviteMember
+            parameters:
+                - name: orgId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/organization.v1.InviteMemberRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/organization.v1.InviteMemberResponse'
+    organizations/{orgId}/members/{userId}:
+        delete:
+            tags:
+                - OrgService
+            operationId: OrgService_RemoveMember
+            parameters:
+                - name: orgId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/organization.v1.RemoveMemberRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/organization.v1.RemoveMemberResponse'
+        patch:
+            tags:
+                - OrgService
+            operationId: OrgService_UpdateMemberRole
+            parameters:
+                - name: orgId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/organization.v1.UpdateMemberRoleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/organization.v1.UpdateMemberRoleResponse'
+    organizations/{orgId}/roles:
+        post:
+            tags:
+                - OrgService
+            operationId: OrgService_AddOrgRole
+            parameters:
+                - name: orgId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/organization.v1.AddOrgRoleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/organization.v1.AddOrgRoleResponse'
+    organizations/{orgId}/roles/{roleId}:
+        delete:
+            tags:
+                - OrgService
+            operationId: OrgService_RemoveOrgRole
+            parameters:
+                - name: orgId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: roleId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/organization.v1.RemoveOrgRoleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/organization.v1.RemoveOrgRoleResponse'
+    organizations/{orgId}/roles/{roleId}/permissions:
+        post:
+            tags:
+                - OrgService
+            operationId: OrgService_UpdateOrgRolePermission
+            parameters:
+                - name: orgId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: roleId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/organization.v1.UpdateOrgRolePermissionRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/organization.v1.UpdateOrgRolePermissionResponse'
+    organizations/{orgId}/settings:
+        patch:
+            tags:
+                - OrgService
+            operationId: OrgService_UpdateOrgSettings
+            parameters:
+                - name: orgId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/organization.v1.UpdateOrgSettingsRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/organization.v1.UpdateOrgSettingsResponse'
 components:
     schemas:
         auth.v1.GetUserRequest:
@@ -153,5 +451,265 @@ components:
                     type: boolean
                 user:
                     $ref: '#/components/schemas/auth.v1.User'
+        organization.v1.AddOrgRoleRequest:
+            type: object
+            properties:
+                Authorization:
+                    type: string
+                orgId:
+                    type: string
+                roleName:
+                    type: string
+                permissions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/organization.v1.Permission'
+        organization.v1.AddOrgRoleResponse:
+            type: object
+            properties:
+                role:
+                    $ref: '#/components/schemas/organization.v1.Role'
+        organization.v1.CreateOrgRequest:
+            type: object
+            properties:
+                Authorization:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                settings:
+                    $ref: '#/components/schemas/organization.v1.OrgSettings'
+        organization.v1.CreateOrgResponse:
+            type: object
+            properties:
+                organization:
+                    $ref: '#/components/schemas/organization.v1.Organization'
+        organization.v1.DeleteOrgRequest:
+            type: object
+            properties:
+                Authorization:
+                    type: string
+                orgId:
+                    type: string
+        organization.v1.DeleteOrgResponse:
+            type: object
+            properties:
+                organization:
+                    $ref: '#/components/schemas/organization.v1.Organization'
+        organization.v1.GetMembersRequest:
+            type: object
+            properties:
+                Authorization:
+                    type: string
+                orgId:
+                    type: string
+        organization.v1.GetMembersResponse:
+            type: object
+            properties:
+                members:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/organization.v1.Member'
+        organization.v1.GetOrgRequest:
+            type: object
+            properties:
+                Authorization:
+                    type: string
+                orgId:
+                    type: string
+        organization.v1.GetOrgResponse:
+            type: object
+            properties:
+                organization:
+                    $ref: '#/components/schemas/organization.v1.Organization'
+        organization.v1.InviteMemberRequest:
+            type: object
+            properties:
+                Authorization:
+                    type: string
+                orgId:
+                    type: string
+                userId:
+                    type: string
+                roleId:
+                    type: string
+        organization.v1.InviteMemberResponse:
+            type: object
+            properties:
+                member:
+                    $ref: '#/components/schemas/organization.v1.Member'
+        organization.v1.Member:
+            type: object
+            properties:
+                id:
+                    type: string
+                orgId:
+                    type: string
+                userId:
+                    type: string
+                roleId:
+                    type: string
+                invitedById:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+                deletedAt:
+                    type: string
+        organization.v1.OrgSettings:
+            type: object
+            properties:
+                allowMembersToInvite:
+                    type: boolean
+                adminRoleConfirmation:
+                    type: boolean
+                inviteConfirmation:
+                    type: boolean
+                inviteConfirmationRole:
+                    type: string
+                defaultInviteRole:
+                    type: string
+        organization.v1.Organization:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                ownerId:
+                    type: string
+                settings:
+                    $ref: '#/components/schemas/organization.v1.OrgSettings'
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+                deletedAt:
+                    type: string
+        organization.v1.Permission:
+            type: object
+            properties:
+                object:
+                    type: string
+                action:
+                    type: string
+        organization.v1.RemoveMemberRequest:
+            type: object
+            properties:
+                Authorization:
+                    type: string
+                orgId:
+                    type: string
+                userId:
+                    type: string
+        organization.v1.RemoveMemberResponse:
+            type: object
+            properties:
+                member:
+                    $ref: '#/components/schemas/organization.v1.Member'
+        organization.v1.RemoveOrgRoleRequest:
+            type: object
+            properties:
+                Authorization:
+                    type: string
+                orgId:
+                    type: string
+                roleId:
+                    type: string
+        organization.v1.RemoveOrgRoleResponse:
+            type: object
+            properties:
+                role:
+                    $ref: '#/components/schemas/organization.v1.Role'
+        organization.v1.Role:
+            type: object
+            properties:
+                id:
+                    type: string
+                orgId:
+                    type: string
+                name:
+                    type: string
+                permissions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/organization.v1.Permission'
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+                deletedAt:
+                    type: string
+        organization.v1.UpdateMemberRoleRequest:
+            type: object
+            properties:
+                Authorization:
+                    type: string
+                orgId:
+                    type: string
+                userId:
+                    type: string
+                roleId:
+                    type: string
+        organization.v1.UpdateMemberRoleResponse:
+            type: object
+            properties:
+                member:
+                    $ref: '#/components/schemas/organization.v1.Member'
+        organization.v1.UpdateOrgRequest:
+            type: object
+            properties:
+                Authorization:
+                    type: string
+                orgId:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                settings:
+                    $ref: '#/components/schemas/organization.v1.OrgSettings'
+        organization.v1.UpdateOrgResponse:
+            type: object
+            properties:
+                organization:
+                    $ref: '#/components/schemas/organization.v1.Organization'
+        organization.v1.UpdateOrgRolePermissionRequest:
+            type: object
+            properties:
+                Authorization:
+                    type: string
+                orgId:
+                    type: string
+                roleId:
+                    type: string
+                permissions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/organization.v1.Permission'
+        organization.v1.UpdateOrgRolePermissionResponse:
+            type: object
+            properties:
+                role:
+                    $ref: '#/components/schemas/organization.v1.Role'
+        organization.v1.UpdateOrgSettingsRequest:
+            type: object
+            properties:
+                Authorization:
+                    type: string
+                orgId:
+                    type: string
+                settings:
+                    $ref: '#/components/schemas/organization.v1.OrgSettings'
+        organization.v1.UpdateOrgSettingsResponse:
+            type: object
+            properties:
+                organization:
+                    $ref: '#/components/schemas/organization.v1.Organization'
 tags:
     - name: AuthService
+    - name: OrgService
