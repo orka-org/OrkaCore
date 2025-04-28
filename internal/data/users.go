@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -53,6 +54,12 @@ func (r *userRepo) CreateUser(ctx context.Context, user *biz.User) (*biz.User, e
 	data.ID = primitive.NewObjectID()
 	res, err := r.coll.InsertOne(ctx, data)
 	if err != nil {
+		if strings.Contains(err.Error(), "E11000") {
+			if strings.Contains(err.Error(), "email") {
+				return nil, errors.New("email already exists")
+			}
+			return nil, errors.New("User with these credentials already exists")
+		}
 		return nil, err
 	}
 	id := res.InsertedID.(primitive.ObjectID).Hex()

@@ -119,6 +119,10 @@ func MongoClient(ctx context.Context, c *conf.Data, log *log.Helper) (*mongo.Cli
 
 func MongoConn(ctx context.Context, client *mongo.Client, log *log.Helper, dbname string) *mongo.Database {
 	db := client.Database(dbname, &options.DatabaseOptions{})
+	_, err := MongoIndexes(ctx, db)
+	if err != nil {
+		log.Error(err, "failed to create indexes")
+	}
 	return db
 }
 

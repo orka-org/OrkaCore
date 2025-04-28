@@ -57,9 +57,6 @@ func (a *authUsecase) Login(ctx context.Context, email, password string) (*Token
 }
 
 func (a *authUsecase) Register(ctx context.Context, email, password string) (*TokensPair, error) {
-	a.log.Debug("register user")
-	a.log.Debug("email", email)
-	a.log.Debug("password", password)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
